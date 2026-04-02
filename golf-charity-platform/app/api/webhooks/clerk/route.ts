@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET
 
   if (!WEBHOOK_SECRET) throw new Error('Missing CLERK_WEBHOOK_SECRET')
-
+//comment just to redeploy
   // THE FIX: Await the headers() function before calling .get()
   const headerPayload = await headers();
   const svix_id = headerPayload.get("svix-id");
