@@ -1,27 +1,62 @@
+"use client";
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Users, Dices, Heart, Medal, Settings, LogOut, ShieldCheck } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
   return (
-    <div className="min-h-screen bg-slate-100 flex">
+    <div className="h-screen bg-slate-100 flex overflow-hidden">
       {/* Admin Sidebar Navigation */}
-      <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between hidden md:flex">
+      <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between hidden md:flex shrink-0">
         <div>
           <div className="h-20 flex items-center px-8 border-b border-slate-800">
              <ShieldCheck className="text-blue-500 mr-2" size={24} />
             <span className="font-bold text-xl text-white tracking-tight">Admin<span className="text-blue-500">Panel</span></span>
           </div>
           <nav className="p-4 space-y-1">
-            <NavItem href="/admin" icon={<LayoutDashboard size={20} />} label="Analytics Overview" active />
-            <NavItem href="/admin/users" icon={<Users size={20} />} label="User Management" />
-            <NavItem href="/admin/draws" icon={<Dices size={20} />} label="Draw Engine" />
-            <NavItem href="/admin/charities" icon={<Heart size={20} />} label="Charity CMS" />
-            <NavItem href="/admin/winners" icon={<Medal size={20} />} label="Winner Verification" />
+            <NavItem 
+              href="/admin" 
+              icon={<LayoutDashboard size={20} />} 
+              label="Analytics Overview" 
+              active={pathname === '/admin'} 
+            />
+            <NavItem 
+              href="/admin/users" 
+              icon={<Users size={20} />} 
+              label="User Management" 
+              active={pathname?.startsWith('/admin/users')} 
+            />
+            <NavItem 
+              href="/admin/draws" 
+              icon={<Dices size={20} />} 
+              label="Draw Engine" 
+              active={pathname?.startsWith('/admin/draws')} 
+            />
+            <NavItem 
+              href="/admin/charities" 
+              icon={<Heart size={20} />} 
+              label="Charity CMS" 
+              active={pathname?.startsWith('/admin/charities')} 
+            />
+            <NavItem 
+              href="/admin/winners" 
+              icon={<Medal size={20} />} 
+              label="Winner Verification" 
+              active={pathname?.startsWith('/admin/winners')} 
+            />
           </nav>
         </div>
         
         <div className="p-4 border-t border-slate-800 space-y-1">
-          <NavItem href="/admin/settings" icon={<Settings size={20} />} label="System Settings" />
+          <NavItem 
+            href="/admin/settings" 
+            icon={<Settings size={20} />} 
+            label="System Settings" 
+            active={pathname?.startsWith('/admin/settings')} 
+          />
           <button className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl hover:text-white hover:bg-slate-800 transition-colors">
             <LogOut size={20} />
             <span>Secure Logout</span>
