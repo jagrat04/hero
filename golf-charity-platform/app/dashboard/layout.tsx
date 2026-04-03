@@ -6,6 +6,7 @@ import { LayoutDashboard, Target, Heart, Trophy, Settings, LogOut } from 'lucide
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  
 
   return (
     <div className="h-screen bg-slate-50 flex overflow-hidden">

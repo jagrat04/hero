@@ -9,23 +9,32 @@ const supabase = createClient(
 );
 
 export default async function ScoresPage() {
-  // 1. Get the current user's Clerk ID
   const { userId } = await auth();
 
-  // 2. Fetch their real scores from Supabase
   let realScores: any[] = [];
+  let isActive = false; // Add this variable
   
   if (userId) {
-    const { data, error } = await supabase
+    // 1. Fetch the user's active scores (You already have this)
+    const { data: scoresData, error: scoresError } = await supabase
       .from('scores')
       .select('id, date_played, stableford_score')
       .eq('user_id', userId)
-      .order('date_played', { ascending: false }) // Newest first
-      .limit(5); // Double enforcing the rolling 5 rule
+      .order('date_played', { ascending: false })
+      .limit(5);
 
-    if (!error && data) {
-      realScores = data;
+    if (!scoresError && scoresData) {
+      realScores = scoresData;
     }
+
+    // 2. Fetch the user's subscription status (NEW)
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('subscription_status')
+      .eq('id', userId)
+      .single();
+
+    isActive = profileData?.subscription_status === 'active';
   }
 
   return (
@@ -39,7 +48,8 @@ export default async function ScoresPage() {
         
         {/* Left Column: The Client Form */}
         <div className="md:col-span-1">
-          <ScoreForm />
+          {/* THE FIX: Pass the isActive prop here! */}
+          <ScoreForm isActive={isActive} />
         </div>
 
         {/* Right Column: The Server-Fetched Data */}
@@ -59,7 +69,6 @@ export default async function ScoresPage() {
                     {score.stableford_score}
                   </div>
                   <div>
-                    {/* Formatting the date to look nice */}
                     <p className="font-semibold text-slate-900">
                       {new Date(score.date_played).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </p>

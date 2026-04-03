@@ -1,11 +1,29 @@
+import { createClient } from '@supabase/supabase-js';
 import { Search, Edit2, ShieldAlert, UserX, CheckCircle2 } from 'lucide-react';
 
-export default function AdminUsersPage() {
-  const users = [
-    { id: "USR-001", name: "Alex Jenkins", email: "alex.j@example.com", subStatus: "Active", charity: "Ocean Cleanup" },
-    { id: "USR-002", name: "Sarah Connor", email: "sarah.c@example.com", subStatus: "Inactive", charity: "Fairway Found." },
-    { id: "USR-003", name: "Mike Ross", email: "mike.r@example.com", subStatus: "Active", charity: "Veterans Drive" },
-  ];
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export default async function AdminUsersPage() {
+  // 1. Fetch profiles and join with the charities table to get the charity name
+  const { data: profiles, error } = await supabase
+    .from('profiles')
+    .select(`
+      id, 
+      first_name, 
+      last_name, 
+      email, 
+      subscription_status, 
+      charity_percentage,
+      charities:selected_charity_id (name)
+    `)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error("Error fetching users:", error);
+  }
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -14,6 +32,8 @@ export default function AdminUsersPage() {
           <h1 className="text-3xl font-bold text-slate-900">User Management</h1>
           <p className="text-slate-500 mt-1">View profiles, manage subscriptions, and audit score entries.</p>
         </div>
+        
+        {/* Search UI (Note: Logic would require a Client Component or Search Params) */}
         <div className="relative w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input 
@@ -35,25 +55,33 @@ export default function AdminUsersPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {users.map((user) => (
-              <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+            {profiles?.map((profile) => (
+              <tr key={profile.id} className="hover:bg-slate-50 transition-colors">
                 <td className="px-6 py-4">
-                  <p className="font-bold text-slate-900">{user.name}</p>
-                  <p className="text-sm text-slate-500">{user.email}</p>
+                  <p className="font-bold text-slate-900">
+                    {profile.first_name} {profile.last_name}
+                  </p>
+                  <p className="text-sm text-slate-500">{profile.email}</p>
                 </td>
                 <td className="px-6 py-4">
-                  {user.subStatus === "Active" ? (
-                     <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full">
-                       <CheckCircle2 size={14} /> Active
-                     </span>
+                  {profile.subscription_status === "active" ? (
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full">
+                      <CheckCircle2 size={14} /> Active
+                    </span>
                   ) : (
-                     <span className="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-full">
-                       <UserX size={14} /> Inactive
-                     </span>
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-full">
+                      <UserX size={14} /> Inactive
+                    </span>
                   )}
                 </td>
-                <td className="px-6 py-4 text-sm text-slate-600">
-                  {user.charity}
+                <td className="px-6 py-4">
+                  <p className="text-sm font-medium text-slate-900">
+                    {/* @ts-ignore - Supabase join syntax */}
+                    {profile.charities?.name || "None Selected"}
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    Commitment: {profile.charity_percentage}%
+                  </p>
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex justify-end gap-2">
@@ -69,6 +97,12 @@ export default function AdminUsersPage() {
             ))}
           </tbody>
         </table>
+
+        {profiles?.length === 0 && (
+          <div className="p-12 text-center">
+            <p className="text-slate-400 italic">No users found in the database.</p>
+          </div>
+        )}
       </div>
     </div>
   );

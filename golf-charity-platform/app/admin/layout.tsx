@@ -35,12 +35,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               label="Draw Engine" 
               active={pathname?.startsWith('/admin/draws')} 
             />
-            <NavItem 
-              href="/admin/charities" 
-              icon={<Heart size={20} />} 
-              label="Charity CMS" 
-              active={pathname?.startsWith('/admin/charities')} 
-            />
+            
             <NavItem 
               href="/admin/winners" 
               icon={<Medal size={20} />} 
